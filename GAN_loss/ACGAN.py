@@ -11,7 +11,7 @@ from tools.utils import *
 from tools.SN_lib.ops import *
 
 class ACGAN(object):
-    model_name = "ACGAN_selu"
+    model_name = "ACGAN"
 
     def __init__(self, sess, epoch, batch_size, z_dim, dataset_name, checkpoint_dir, result_dir, log_dir):
         self.sess = sess
