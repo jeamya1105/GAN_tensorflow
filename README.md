@@ -1,2 +1,2 @@
-# Testing github
-testing updata
+# GAN Learning
+Just for record
