@@ -86,24 +86,14 @@ class VAE(object):
         bs = self.batch_size
 
         """ Graph Input """
-        # images
         self.inputs = tf.placeholder(tf.float32, [bs] + image_dims, name='real_images')
-
-        # noises
         self.z = tf.placeholder(tf.float32, [bs, self.z_dim], name='z')
-
-        """ Loss Function """
-        # encoding
         self.mu, sigma = self.encoder(self.inputs, is_training=True, reuse=False)
-
-        # sampling by re-parameterization technique
         z = self.mu + sigma * tf.random_normal(tf.shape(self.mu), 0, 1, dtype=tf.float32)
 
-        # decoding
         out = self.decoder(z, is_training=True, reuse=False)
         self.out = tf.clip_by_value(out, 1e-8, 1 - 1e-8)
 
-        # loss
         marginal_likelihood = tf.reduce_sum(self.inputs * tf.log(self.out) + (1 - self.inputs) * tf.log(1 - self.out),
                                             [1, 2])
         KL_divergence = 0.5 * tf.reduce_sum(tf.square(self.mu) + tf.square(sigma) - tf.log(1e-8 + tf.square(sigma)) - 1, [1])
@@ -115,18 +105,14 @@ class VAE(object):
 
         self.loss = -ELBO
 
-        """ Training """
-        # optimizers
         t_vars = tf.trainable_variables()
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             self.optim = tf.train.AdamOptimizer(self.learning_rate*5, beta1=self.beta1) \
                       .minimize(self.loss, var_list=t_vars)
 
-        """" Testing """
-        # for test
         self.fake_images = self.decoder(self.z, is_training=False, reuse=True)
 
-        """ Summary """
+
         nll_sum = tf.summary.scalar("nll", self.neg_loglikelihood)
         kl_sum = tf.summary.scalar("kl", self.KL_divergence)
         loss_sum = tf.summary.scalar("loss", self.loss)
